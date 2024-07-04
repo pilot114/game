@@ -1,0 +1,14 @@
+{
+    "name": "pilot114/game",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Game\\": "src/"
+        }
+    },
+    "require": {
+        "symfony/var-dumper": "^7.1",
+        "vkcom/vk-php-sdk": "^5.131",
+        "phpoffice/phpspreadsheet": "^2.1"
+    }
+}
