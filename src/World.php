@@ -37,7 +37,13 @@ class World
         $forest->addItem($sword);
 
         $villager = new Npc('Villager', 'A friendly villager');
-        $villager->addQuest(new Quest('Find sheep', 'Find my lost sheep'));
+
+        $tasks = new Collection();
+        $tasks->add(new Task('Bandit', TaskAction::KILL));
+        $tasks->add(new Task('Old Sword', TaskAction::TAKE));
+        $tasks->add(new Task('Villager', TaskAction::TALK));
+
+        $villager->addQuest(new Quest('Find my lost sheep', 'Find and return the lost sheep', $tasks));
         $village->addNpc($villager);
 
         $this->locations->add($forest);
@@ -88,11 +94,12 @@ class World
             if ($monster->health <= 0) {
                 $this->ui->output("You defeated the {$monster->name}!\n");
 
-                // Give player loot
                 foreach ($monster->loot->getAll() as $item) {
                     $this->player->addItem($item);
                 }
                 $location->removeMonster($monster);
+
+                $this->player->completeQuestTask(new Task($monster->name, TaskAction::KILL));
 
                 return;
             }
@@ -123,6 +130,8 @@ class World
             $item = $location->items->getRandom();
             $this->player->addItem($item);
             $location->removeItem($item);
+
+            $this->player->completeQuestTask(new Task($item->name, TaskAction::TAKE));
         } else {
             $this->ui->output("Unknown location.\n");
         }
@@ -145,16 +154,17 @@ class World
             if (!$npc->quests->isEmpty()) {
                 foreach ($npc->quests->getAll() as $quest) {
                     $this->ui->output("Quest available: $quest\n");
+                    $takeQuest = $this->ui->input("Do you want to take this quest? (yes/no) ");
+                    if (in_array(strtolower($takeQuest), ['yes', 'y'])) {
+                        $this->player->addQuest($quest);
+                    }
                 }
             }
+
+            $this->player->completeQuestTask(new Task($npc->name, TaskAction::TALK));
         } else {
             $this->ui->output("Unknown location.\n");
         }
-    }
-
-    public function showQuests(): void
-    {
-        // Add logic to display quests to the player
     }
 
     private function getLocationByName(string $name): ?Location

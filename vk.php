@@ -291,8 +291,11 @@ class VkExcelService extends BaseExcelService
 
 error_reporting(E_ALL & ~E_NOTICE);
 
-$year = 2008;
+$year = 2024;
 $items = getUserItems($year);
+if ($items === []) {
+    exit('Not found');
+}
 $items = array_map(fn(array $item) => new VkUser($item), $items);
 
 $service = new VkExcelService();

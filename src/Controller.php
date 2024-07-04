@@ -4,6 +4,8 @@ namespace Game;
 
 class Controller
 {
+    const string SAVE_FILE = 'savegame.txt';
+
     public function __construct(
         private UI $ui,
         private Player $player,
@@ -35,9 +37,9 @@ class Controller
             'move' => $this->world->move(),
             'inventory' => $this->player->showInventory(),
             'take' => $this->world->takeItem(),
-            'talk' => $this->world->talkToNpc(),
-            'quest' => $this->world->showQuests(),
             'drop' => $this->player->dropItem(),
+            'talk' => $this->world->talkToNpc(),
+            'quest' => $this->player->showQuests(),
             'save' => $this->saveGame(),
             'load' => $this->loadGame(),
             default => $this->ui->output("Unknown command.\n"),
@@ -50,18 +52,18 @@ class Controller
             'player' => $this->player,
             'world' => $this->world,
         ]);
-        file_put_contents('savegame.txt', $data);
+        file_put_contents(self::SAVE_FILE, $data);
         $this->ui->output("Game saved!\n");
     }
 
     private function loadGame(): void
     {
-        if (!file_exists('savegame.txt')) {
+        if (!file_exists(self::SAVE_FILE)) {
             $this->ui->output("No saved game found.\n");
             return;
         }
 
-        $data = file_get_contents('savegame.txt');
+        $data = file_get_contents(self::SAVE_FILE);
         $savedData = unserialize($data);
         $this->player = $savedData['player'];
         $this->world = $savedData['world'];

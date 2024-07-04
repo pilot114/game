@@ -8,6 +8,8 @@ class Player
     public int $level;
     /** @var Collection<Item> */
     public Collection $inventory;
+    /** @var Collection<Quest> */
+    public Collection $quests;
     public int $health;
     public int $attack;
 
@@ -15,6 +17,7 @@ class Player
         private readonly UI $ui,
     ) {
         $this->inventory = new Collection();
+        $this->quests = new Collection();
     }
 
     public function createCharacter(): void
@@ -59,6 +62,37 @@ class Player
             $this->removeItem($item);
         } else {
             $this->ui->output("You don't have an item named '$name'.\n");
+        }
+    }
+
+    public function addQuest(Quest $quest): void
+    {
+        $this->quests->add($quest);
+        $this->ui->output("You have taken the quest: $quest\n");
+    }
+
+    public function showQuests(): void
+    {
+        if ($this->quests->isEmpty()) {
+            $this->ui->output("You have no quests.\n");
+        } else {
+            $this->ui->output("Your quests: " . $this->quests . "\n");
+        }
+    }
+
+    public function completeQuestTask(Task $task): void
+    {
+        foreach ($this->quests->getAll() as $quest) {
+            if (!$quest->isCompleted) {
+                $taskCompleted = $quest->tryCompleteTask($task);
+                if (!$taskCompleted) {
+                    continue;
+                }
+                $this->ui->output("Task '$task' completed for quest '{$quest->title}'.\n");
+                if ($quest->isCompleted) {
+                    $this->ui->output("Quest '{$quest->title}' completed!\n");
+                }
+            }
         }
     }
 }
