@@ -34,6 +34,10 @@ class Controller
             'look' => $this->world->look(),
             'move' => $this->world->move(),
             'inventory' => $this->player->showInventory(),
+            'take' => $this->world->takeItem(),
+            'talk' => $this->world->talkToNpc(),
+            'quest' => $this->world->showQuests(),
+            'drop' => $this->player->dropItem(),
             'save' => $this->saveGame(),
             'load' => $this->loadGame(),
             default => $this->ui->output("Unknown command.\n"),
@@ -64,5 +68,3 @@ class Controller
         $this->ui->output("Game loaded!\n");
     }
 }
-
-

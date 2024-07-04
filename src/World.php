@@ -4,12 +4,14 @@ namespace Game;
 
 class World
 {
-    private array $locations;
+    /** @var Collection<Location> */
+    private Collection $locations;
 
     public function __construct(
         private UI $ui,
         private Player $player,
     ) {
+        $this->locations = new Collection();
     }
 
     public function generateWorld(): void
@@ -31,9 +33,18 @@ class World
         $village->addMonster($bandit);
         $dungeon->addMonster($dragon);
 
-        $this->locations = [$forest, $village, $dungeon];
+        $sword = new Item('Old Sword', 'An old rusty sword');
+        $forest->addItem($sword);
 
-        $this->ui->output("World generated with locations: " . implode(", ", $this->locations) . "\n");
+        $villager = new Npc('Villager', 'A friendly villager');
+        $villager->addQuest(new Quest('Find sheep', 'Find my lost sheep'));
+        $village->addNpc($villager);
+
+        $this->locations->add($forest);
+        $this->locations->add($village);
+        $this->locations->add($dungeon);
+
+        $this->ui->output("World generated with locations: " . $this->locations . "\n");
     }
 
     public function display(): void
@@ -43,7 +54,7 @@ class World
 
     public function look(): void
     {
-        $this->ui->output("You see: " . implode(", ", $this->locations) . "\n");
+        $this->ui->output("You see: " . $this->locations . "\n");
     }
 
     public function move(): void
@@ -61,11 +72,12 @@ class World
 
     private function encounter(Location $location): void
     {
-        if (empty($location->monsters)) {
+        if ($location->monsters->isEmpty()) {
+            $this->ui->output("This location is peaceful.\n");
             return;
         }
 
-        $monster = $location->monsters[array_rand($location->monsters)];
+        $monster = $location->monsters->getRandom();
         $this->ui->output("You encounter a {$monster}!\n");
 
         while ($monster->health > 0 && $this->player->health > 0) {
@@ -77,7 +89,7 @@ class World
                 $this->ui->output("You defeated the {$monster->name}!\n");
 
                 // Give player loot
-                foreach ($monster->loot as $item) {
+                foreach ($monster->loot->getAll() as $item) {
                     $this->player->addItem($item);
                 }
                 $location->removeMonster($monster);
@@ -97,13 +109,56 @@ class World
         }
     }
 
+    public function takeItem(): void
+    {
+        $locationName = $this->ui->input("Where do you want to search for items? ");
+        $location = $this->getLocationByName($locationName);
+
+        if ($location) {
+            if ($location->items->isEmpty()) {
+                $this->ui->output("No items found in $location.\n");
+                return;
+            }
+
+            $item = $location->items->getRandom();
+            $this->player->addItem($item);
+            $location->removeItem($item);
+        } else {
+            $this->ui->output("Unknown location.\n");
+        }
+    }
+
+    public function talkToNpc(): void
+    {
+        $locationName = $this->ui->input("Where do you want to look for NPCs? ");
+        $location = $this->getLocationByName($locationName);
+
+        if ($location) {
+            if ($location->npcs->isEmpty()) {
+                $this->ui->output("No NPCs found in $location.\n");
+                return;
+            }
+
+            $npc = $location->npcs->getRandom();
+            $this->ui->output("You talk to {$npc->name}. They say: '{$npc->dialogue}'.\n");
+
+            if (!$npc->quests->isEmpty()) {
+                foreach ($npc->quests->getAll() as $quest) {
+                    $this->ui->output("Quest available: $quest\n");
+                }
+            }
+        } else {
+            $this->ui->output("Unknown location.\n");
+        }
+    }
+
+    public function showQuests(): void
+    {
+        // Add logic to display quests to the player
+    }
+
     private function getLocationByName(string $name): ?Location
     {
-        foreach ($this->locations as $location) {
-            if ($location->name === $name) {
-                return $location;
-            }
-        }
-        return null;
+        return $this->locations->getBy('name', $name);
     }
 }

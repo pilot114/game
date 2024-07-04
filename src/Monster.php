@@ -4,7 +4,8 @@ namespace Game;
 
 class Monster
 {
-    public array $loot;
+    /** @var Collection<Item> */
+    public Collection $loot;
 
     public function __construct(
         public string $name,
@@ -12,12 +13,12 @@ class Monster
         public int $health,
         public int $attack
     ) {
-        $this->loot = [];
+        $this->loot = new Collection();
     }
 
     public function addLoot(Item $item): void
     {
-        $this->loot[] = $item;
+        $this->loot->add($item);
     }
 
     public function __toString(): string
