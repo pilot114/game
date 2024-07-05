@@ -1,4 +1,9 @@
 ### TODO
 
-- вынести генерацию мира + квесты в отдельную сущность
-- цветной вывод (в toString)
+- добавить локализацию на русский
+- добавить графический консольный интерфейс
+- сделать генератор на world.yaml
+
+### Карта
+
+https://penfox.ru/blog/kak-bystro-generirovat-fentezi-karty-5-luchshix-instrumentov/

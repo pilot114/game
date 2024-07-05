@@ -2,6 +2,8 @@
 
 namespace Game;
 
+use Symfony\Component\Yaml\Yaml;
+
 class World
 {
     /** @var Collection<Location> */
@@ -16,39 +18,37 @@ class World
 
     public function generateWorld(): void
     {
-        $forest = new Location('Forest', 'A dense and dark forest.');
-        $village = new Location('Village', 'A small peaceful village.');
-        $dungeon = new Location('Dungeon', 'A dangerous dungeon full of monsters.');
+        $worldData = Yaml::parseFile(__DIR__ . '/world.yaml');
 
-        $goblin = new Monster('Goblin', 1, 10, 2);
-        $goblin->addLoot(new Item('Goblin Ear', 'A trophy from a Goblin'));
+        foreach ($worldData['locations'] as $locationData) {
+            $location = new Location($locationData['name'], $locationData['description']);
 
-        $bandit = new Monster('Bandit', 2, 15, 3);
-        $bandit->addLoot(new Item('Bandit Dagger', 'A small dagger used by Bandits'));
+            foreach ($locationData['monsters'] as $monsterData) {
+                $monster = new Monster($monsterData['name'], $monsterData['level'], $monsterData['health'], $monsterData['attack']);
+                foreach ($monsterData['loot'] as $lootData) {
+                    $monster->addLoot(new Item($lootData['name'], $lootData['description']));
+                }
+                $location->addMonster($monster);
+            }
 
-        $dragon = new Monster('Dragon', 10, 100, 20);
-        $dragon->addLoot(new Item('Dragon Scale', 'A rare scale from a Dragon'));
+            foreach ($locationData['items'] as $itemData) {
+                $location->addItem(new Item($itemData['name'], $itemData['description']));
+            }
 
-        $forest->addMonster($goblin);
-        $village->addMonster($bandit);
-        $dungeon->addMonster($dragon);
+            foreach ($locationData['npcs'] as $npcData) {
+                $npc = new Npc($npcData['name'], $npcData['dialogue']);
+                foreach ($npcData['quests'] as $questData) {
+                    $tasks = new Collection();
+                    foreach ($questData['tasks'] as $taskData) {
+                        $tasks->add(new Task($taskData['title'], TaskAction::{$taskData['action']}));
+                    }
+                    $npc->addQuest(new Quest($questData['title'], $questData['description'], $tasks));
+                }
+                $location->addNpc($npc);
+            }
 
-        $sword = new Item('Old Sword', 'An old rusty sword');
-        $forest->addItem($sword);
-
-        $villager = new Npc('Villager', 'A friendly villager');
-
-        $tasks = new Collection();
-        $tasks->add(new Task('Bandit', TaskAction::KILL));
-        $tasks->add(new Task('Old Sword', TaskAction::TAKE));
-        $tasks->add(new Task('Villager', TaskAction::TALK));
-
-        $villager->addQuest(new Quest('Find my lost sheep', 'Find and return the lost sheep', $tasks));
-        $village->addNpc($villager);
-
-        $this->locations->add($forest);
-        $this->locations->add($village);
-        $this->locations->add($dungeon);
+            $this->locations->add($location);
+        }
 
         $this->ui->output("World generated with locations: " . $this->locations . "\n");
     }
@@ -89,10 +89,10 @@ class World
         while ($monster->health > 0 && $this->player->health > 0) {
             // Player attacks monster
             $monster->health -= $this->player->attack;
-            $this->ui->output("You attack the {$monster->name} for {$this->player->attack} damage. Monster health: {$monster->health}\n");
+            $this->ui->output("You attack the $monster for {$this->player->attack} damage. Monster health: {$monster->health}\n");
 
             if ($monster->health <= 0) {
-                $this->ui->output("You defeated the {$monster->name}!\n");
+                $this->ui->output("You defeated the $monster!\n");
 
                 foreach ($monster->loot->getAll() as $item) {
                     $this->player->addItem($item);
@@ -106,10 +106,10 @@ class World
 
             // Monster attacks player
             $this->player->health -= $monster->attack;
-            $this->ui->output("The {$monster->name} attacks you for {$monster->attack} damage. Your health: {$this->player->health}\n");
+            $this->ui->output("The $monster attacks you for {$monster->attack} damage. Your health: {$this->player->health}\n");
 
             if ($this->player->health <= 0) {
-                $this->ui->output("You were defeated by the {$monster->name}...\n");
+                $this->ui->output("You were defeated by the $monster...\n");
                 $this->ui->output("Game over.\n");
                 exit; // End game
             }
@@ -149,13 +149,12 @@ class World
             }
 
             $npc = $location->npcs->getRandom();
-            $this->ui->output("You talk to {$npc->name}. They say: '{$npc->dialogue}'.\n");
+            $this->ui->output("You talk to $npc. They say: '{$npc->dialogue}'.\n");
 
             if (!$npc->quests->isEmpty()) {
                 foreach ($npc->quests->getAll() as $quest) {
                     $this->ui->output("Quest available: $quest\n");
-                    $takeQuest = $this->ui->input("Do you want to take this quest? (yes/no) ");
-                    if (in_array(strtolower($takeQuest), ['yes', 'y'])) {
+                    if ($this->ui->accept("Do you want to take this quest?")) {
                         $this->player->addQuest($quest);
                     }
                 }

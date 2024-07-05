@@ -14,4 +14,10 @@ class UI
     {
         echo $message;
     }
+
+    public function accept($prompt): bool
+    {
+        $answer = $this->input("$prompt (yes/no) ");
+        return in_array(strtolower($answer), ['yes', 'y']);
+    }
 }

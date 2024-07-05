@@ -23,6 +23,6 @@ class Monster
 
     public function __toString(): string
     {
-        return $this->name;
+        return "\033[31m" . $this->name . "\033[0m";
     }
 }

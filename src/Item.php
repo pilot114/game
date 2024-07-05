@@ -12,6 +12,6 @@ class Item
 
     public function __toString(): string
     {
-        return $this->name;
+        return "\033[33m" . $this->name . "\033[0m";
     }
 }

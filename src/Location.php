@@ -52,6 +52,6 @@ class Location
 
     public function __toString(): string
     {
-        return $this->name;
+        return "\033[34m" . $this->name . "\033[0m";
     }
 }

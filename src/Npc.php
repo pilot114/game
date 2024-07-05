@@ -21,6 +21,6 @@ class Npc
 
     public function __toString(): string
     {
-        return $this->name;
+        return "\033[32m" . $this->name . "\033[0m";
     }
 }
