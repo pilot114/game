@@ -16,7 +16,7 @@ include_once './vendor/autoload.php';
 function getUserItems(int $year, ?int $month = null): array
 {
     // https://vkhost.github.io/
-    $accessToken = 'vk1.a.bqBezTzwxhh0QVLtBoLgBpauXxJc0JR6RLm9ip8WMrtHWXtjdn6QQjfAA3jUM3WjNX5gpWt0sWkfb9AU9z16Av1D5m4TO4oCoEgBIKX00x3k57fi5XejJLiiSz3bJuE_03tJ3ahmog3WR9_G0pDW1O9G3WfUnbrSPDkrv2J7zmt9B-g3y976gnpU8uHo1Ohu3HiA8KWucCI_7aNv10ZaPQ';
+    $accessToken = 'vk1.a.WY6yKs3UAcvXzYx9XUUf33Gp9IAe3VPdyRj0ZjPhQ42HlatQKp3NmP4LyOIVJFTnEuO6kdrxJbX6LoAPOZklh-ALzg2K06TOxb5c-jhBAfZxYZXPpisZzGjOnKqBbP3Pe3YUiHmJ4nP1_z0YTcLHfLMgmpqoqsUUeIZHI9EI_F_DOJXB1iYZhHb63ndF2gD0zK7GOTG3yqlfkVTBLr0WqQ';
 
     $fields = [
         'about', 'bdate', 'last_seen', 'sex',
@@ -119,7 +119,7 @@ class VkUser
 
 abstract class BaseExcelService
 {
-    private Spreadsheet $spreadsheet;
+    protected Spreadsheet $spreadsheet;
     protected Worksheet $activeWorksheet;
 
     public function __construct()
@@ -162,6 +162,19 @@ abstract class BaseExcelService
     {
         $writer = IOFactory::createWriter($this->spreadsheet, $type);
         $writer->save($name);
+    }
+
+    // TODO: read interface
+
+    protected function readWorksheet(string $name, ?int $index = null): array
+    {
+        $this->spreadsheet = IOFactory::load($name);
+        if ($index === null) {
+            $this->activeWorksheet = $this->spreadsheet->getActiveSheet();
+        } else {
+            $this->activeWorksheet = $this->spreadsheet->getSheet($index);
+        }
+        return $this->activeWorksheet->toArray();
     }
 }
 
@@ -289,14 +302,81 @@ class VkExcelService extends BaseExcelService
     }
 }
 
-error_reporting(E_ALL & ~E_NOTICE);
+class CombineVkExcelService extends VkExcelService
+{
+    protected array $data  = [];
+    protected int $nextRow = 2;
 
-$year = 2024;
-$items = getUserItems($year);
-if ($items === []) {
-    exit('Not found');
+    public function append(string $filename): void
+    {
+        $import = new class() extends BaseExcelService {
+            public function extractImages(): \Generator
+            {
+                foreach ($this->activeWorksheet->getDrawingCollection() as $drawing) {
+                    $zipReader = fopen($drawing->getPath(),'r');
+                    $imageContents = '';
+                    while (!feof($zipReader)) {
+                        $imageContents .= fread($zipReader,1024);
+                    }
+                    fclose($zipReader);
+                    yield $imageContents;
+                }
+            }
+        };
+
+        $data = $import->readWorksheet($filename);
+
+        // заголовки, просто перезаписываем
+        $this->activeWorksheet->fromArray($data[0]);
+
+        // данные
+        array_shift($data);
+        foreach ($data as $i => $row) {
+            $realRow = $this->nextRow + $i;
+            $this->activeWorksheet->fromArray($row, startCell: "A$realRow");
+            $this->activeWorksheet->getCell("A$realRow")->getHyperlink()->setUrl($row[0]);
+        }
+        // картинки
+        foreach ($import->extractImages() as $i => $extractImage) {
+            $realRow = $this->nextRow + $i;
+
+            $tempFile = sys_get_temp_dir() . "/$realRow.jpg";
+            file_put_contents($tempFile, $extractImage);
+
+            $this->addPhoto($tempFile, $realRow);
+        }
+
+        // стили и ширина
+        $this
+            ->eachColumn($this->setWidth(...))
+            ->eachRow($this->setStyle(...))
+        ;
+
+        $this->nextRow += count($data);
+    }
+
+    public function save(string $name): void
+    {
+        $this->writeFile($name);
+    }
 }
-$items = array_map(fn(array $item) => new VkUser($item), $items);
 
-$service = new VkExcelService();
-$service->handle($items, "./excel/$year.xlsx");
+error_reporting(E_ALL & ~E_NOTICE);
+ini_set('memory_limit', '2G');
+
+//$year = 2024;
+//$items = getUserItems($year);
+//if ($items === []) {
+//    exit('Not found');
+//}
+//$items = array_map(fn(array $item) => new VkUser($item), $items);
+//
+//$service = new VkExcelService();
+//$service->handle($items, "./excel/$year.xlsx");
+
+$service = new CombineVkExcelService();
+foreach (glob('./excel/*.xlsx') as $item) {
+    $service->append($item);
+    dump("$item done");
+}
+$service->save("./excel/all.xlsx");

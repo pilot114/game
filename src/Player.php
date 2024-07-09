@@ -30,7 +30,6 @@ class Player
         $this->addItem(new Item("Shield", "A basic shield"));
         $this->addItem(new Item("Health Potion", "Restores health"));
         $this->ui->output("Character created: {$this->name}, Level: {$this->level}\n");
-        $this->ui->output("Starting items: " . $this->inventory . "\n");
     }
 
     public function addItem(Item $item): void
