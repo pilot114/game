@@ -8,8 +8,7 @@
     },
     "require": {
         "symfony/var-dumper": "^7.1",
-        "vkcom/vk-php-sdk": "^5.131",
-        "phpoffice/phpspreadsheet": "^2.1",
-        "symfony/yaml": "^7.1"
+        "symfony/yaml": "^7.1",
+        "php-tui/php-tui": "^0.1.0"
     }
 }

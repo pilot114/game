@@ -11,3 +11,7 @@
 ### Карта
 
 https://penfox.ru/blog/kak-bystro-generirovat-fentezi-karty-5-luchshix-instrumentov/
+
+### releases
+
+image php:8.3-cli-alpine

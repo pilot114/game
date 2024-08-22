@@ -2,9 +2,9 @@
 
 namespace Game;
 
-enum TaskAction
+enum TaskAction: string
 {
-    case KILL;
-    case TAKE;
-    case TALK;
+    case KILL = 'KILL';
+    case TAKE = 'TAKE';
+    case TALK = 'TALK';
 }

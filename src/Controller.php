@@ -2,71 +2,123 @@
 
 namespace Game;
 
+use Game\Page\PageInterface;
+use Game\Page\StartPage;
+use PhpTui\Term\Actions;
+use PhpTui\Term\ClearType;
+use PhpTui\Term\Event;
+use PhpTui\Term\Event\CharKeyEvent;
+use PhpTui\Term\KeyModifiers;
+use PhpTui\Term\Terminal;
+use PhpTui\Tui\DisplayBuilder;
+use PhpTui\Tui\Extension\Bdf\BdfExtension;
+use PhpTui\Tui\Extension\ImageMagick\ImageMagickExtension;
+use PhpTui\Tui\Model\Display\Display;
+
 class Controller
 {
-    const string SAVE_FILE = 'savegame.txt';
+    use GameProgress;
+
+    private Terminal $terminal;
+    private PageInterface $page;
+    private Display $display;
+
+    private bool $isRun = true;
 
     public function __construct(
-        private UI $ui,
+        private UI     $ui,
         private Player $player,
-        private World $world,
-    ) {
+        private World  $world,
+    )
+    {
+        $this->terminal = Terminal::new();
+        $this->page = new StartPage();
+        $this->display = DisplayBuilder::default()
+            ->addExtension(new ImageMagickExtension())
+            ->addExtension(new BdfExtension())
+            ->build();
     }
 
-    public function start(): void
+    public function handleTerminal(): int
     {
-        $this->ui->output("Welcome to the RPG Game!\n");
+        try {
+            $this->terminal->execute(Actions::cursorHide());
+            $this->terminal->execute(Actions::alternateScreenEnable());
+            $this->terminal->execute(Actions::enableMouseCapture());
+            $this->terminal->enableRawMode();
+
+            return $this->mainLoop();
+        } catch (\Throwable $err) {
+            $this->terminal->disableRawMode();
+            $this->terminal->execute(Actions::disableMouseCapture());
+            $this->terminal->execute(Actions::alternateScreenDisable());
+            $this->terminal->execute(Actions::cursorShow());
+            $this->terminal->execute(Actions::clear(ClearType::All));
+
+            throw $err;
+        }
+    }
+
+    private function mainLoop(): int
+    {
+        while ($this->isRun) {
+            while (null !== $event = $this->terminal->events()->next()) {
+                $this->globalHandle($event);
+                $page = $this->page->handle($event);
+                if ($page !== null) {
+                    $this->page = $page;
+                }
+            }
+            $this->page->render($this->display);
+        }
+
+        $this->terminal->disableRawMode();
+        $this->terminal->execute(Actions::cursorShow());
+        $this->terminal->execute(Actions::alternateScreenDisable());
+        $this->terminal->execute(Actions::disableMouseCapture());
+
+        return 0;
+    }
+
+    private function globalHandle(Event $event): void
+    {
+        // TODO: top widget for main menu
+        if ($event instanceof CharKeyEvent) {
+            if ($event->modifiers === KeyModifiers::NONE) {
+                if ($event->char === 'q') {
+                    $this->isRun = false;
+                }
+            }
+        }
+        return;
+
+        // TODO: buffer mode for input text
+
+        if ($event instanceof CharKeyEvent) {
+            /*
+            $result = match ($event->char) {
+                'l' => $this->world->look(),
+                'm' => $this->world->move(),
+                't' => $this->world->talkToNpc(),
+                'take' => $this->world->takeItem(),
+                'i' => $this->player->showInventory(),
+                'd' => $this->player->dropItem(),
+                'j' => $this->player->showQuests(),
+                's' => $this->saveGame(),
+                'load' => $this->loadGame(),
+                default => $this->ui->output("Неизвестная команда\n"),
+            };
+            */
+        }
+
+        /*
+        $this->world->display();
+        $command = $this->ui->input("Команда: ");
+        $this->processCommand($command);
+        */
+        /*
         $this->player->createCharacter();
         $this->world->generateWorld();
-        $this->mainLoop();
-    }
-
-    private function mainLoop(): void
-    {
-        while (true) {
-            $this->world->display();
-            $command = $this->ui->input("Enter command: ");
-            $this->processCommand($command);
-        }
-    }
-
-    private function processCommand($command): void
-    {
-        match ($command) {
-            'look' => $this->world->look(),
-            'move' => $this->world->move(),
-            'talk' => $this->world->talkToNpc(),
-            'take' => $this->world->takeItem(),
-            'inventory' => $this->player->showInventory(),
-            'drop'      => $this->player->dropItem(),
-            'quest'     => $this->player->showQuests(),
-            'save' => $this->saveGame(),
-            'load' => $this->loadGame(),
-            default => $this->ui->output("Unknown command.\n"),
-        };
-    }
-
-    private function saveGame(): void
-    {
-        $data = serialize([
-            'player' => $this->player,
-            'world' => $this->world,
-        ]);
-        file_put_contents(self::SAVE_FILE, $data);
-        $this->ui->output("Game saved!\n");
-    }
-
-    private function loadGame(): void
-    {
-        if (!file_exists(self::SAVE_FILE)) {
-            $this->ui->output("No saved game found.\n");
-            return;
-        }
-
-        $data = file_get_contents(self::SAVE_FILE);
-        $savedData = unserialize($data);
-        $this->player = $savedData['player'];
-        $this->world = $savedData['world'];
-        $this->ui->output("Game loaded!\n");
+        */
     }
 }

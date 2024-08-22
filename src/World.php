@@ -40,7 +40,8 @@ class World
                 foreach ($npcData['quests'] as $questData) {
                     $tasks = new Collection();
                     foreach ($questData['tasks'] as $taskData) {
-                        $tasks->add(new Task($taskData['title'], TaskAction::{$taskData['action']}));
+                        $taskAction = TaskAction::tryFrom($taskData['action']);
+                        $tasks->add(new Task($taskData['title'], $taskAction));
                     }
                     $npc->addQuest(new Quest($questData['title'], $questData['description'], $tasks));
                 }
