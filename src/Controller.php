@@ -2,13 +2,14 @@
 
 namespace Game;
 
+use Game\Page\HeroStartPage;
 use Game\Page\PageInterface;
-use Game\Page\StartPage;
+use Game\Page\MainPage;
+use Game\Page\Stop;
 use PhpTui\Term\Actions;
 use PhpTui\Term\ClearType;
 use PhpTui\Term\Event;
 use PhpTui\Term\Event\CharKeyEvent;
-use PhpTui\Term\KeyModifiers;
 use PhpTui\Term\Terminal;
 use PhpTui\Tui\DisplayBuilder;
 use PhpTui\Tui\Extension\Bdf\BdfExtension;
@@ -20,8 +21,8 @@ class Controller
     use GameProgress;
 
     private Terminal $terminal;
-    private PageInterface $page;
     private Display $display;
+    private PageInterface $page;
 
     private bool $isRun = true;
 
@@ -32,11 +33,15 @@ class Controller
     )
     {
         $this->terminal = Terminal::new();
-        $this->page = new StartPage();
         $this->display = DisplayBuilder::default()
             ->addExtension(new ImageMagickExtension())
             ->addExtension(new BdfExtension())
             ->build();
+
+        //$this->page = new MainPage();
+        $this->page = new HeroStartPage();
+
+        Audio::startMusic('luma_dream_machine.wav');
     }
 
     public function handleTerminal(): int
@@ -63,9 +68,11 @@ class Controller
     {
         while ($this->isRun) {
             while (null !== $event = $this->terminal->events()->next()) {
-                $this->globalHandle($event);
-                $page = $this->page->handle($event);
+                $page = $this->globalHandle($event) ?: $this->page->handle($event);
                 if ($page !== null) {
+                    if ($page instanceof Stop) {
+                        $this->isRun = false;
+                    }
                     $this->page = $page;
                 }
             }
@@ -77,20 +84,19 @@ class Controller
         $this->terminal->execute(Actions::alternateScreenDisable());
         $this->terminal->execute(Actions::disableMouseCapture());
 
+        Audio::stopMusic('luma_dream_machine.wav');
+
         return 0;
     }
 
-    private function globalHandle(Event $event): void
+    private function globalHandle(Event $event): ?PageInterface
     {
-        // TODO: top widget for main menu
-        if ($event instanceof CharKeyEvent) {
-            if ($event->modifiers === KeyModifiers::NONE) {
-                if ($event->char === 'q') {
-                    $this->isRun = false;
-                }
+        if ($event instanceof Event\CodedKeyEvent) {
+            if ($event->code->name === 'Esc' && (!$this->page instanceof MainPage)) {
+                return new MainPage();
             }
         }
-        return;
+        return null;
 
         // TODO: buffer mode for input text
 
