@@ -2,6 +2,8 @@
 
 namespace Game\Page;
 
+use Game\Player;
+use Game\World;
 use PhpTui\Term\Event;
 use PhpTui\Tui\DisplayBuilder;
 use PhpTui\Tui\Extension\Bdf\BdfExtension;
@@ -23,6 +25,12 @@ use PhpTui\Tui\Model\Widget\BorderType;
 
 class GamePage implements PageInterface
 {
+    public function __construct(
+//        private World  $world,
+    ) {
+//        $world->generateWorld();
+    }
+
     public function handle(Event $event): ?PageInterface
     {
         return null;

@@ -109,7 +109,5 @@ build 1 by 0x600dc0de
             )
         );
     }
-
-    // TODO: cache render, for background
-    //        new ImageWidget(path: __DIR__ . '/../resources/oblivion.jpg')
+    // TODO: background
 }

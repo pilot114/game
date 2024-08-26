@@ -2,6 +2,7 @@
 
 namespace Game\Page;
 
+use Game\World;
 use PhpTui\Term\Event;
 use PhpTui\Term\MouseButton;
 use PhpTui\Tui\DisplayBuilder;
@@ -31,12 +32,10 @@ class HeroStartPage implements PageInterface
     private string $class = 'warrior';
     private string $gender = 'men';
 
-    private string $description = '';
+    private string $description = '<описание персонажа, собираемое по входным параметрам>';
 
     public function handle(Event $event): ?PageInterface
     {
-        $this->description = print_r($event, true);
-
         if ($event instanceof Event\MouseEvent) {
             if ($event->button->name !== 'Left' || $event->kind->name !== 'Down') {
                 return null;
@@ -49,7 +48,7 @@ class HeroStartPage implements PageInterface
                 'class_wizard' => [1,7,34,7],
                 'gender_men' => [1,10,34,10],
                 'gender_women' => [1,11,34,11],
-                'start' => [109,36,143,36],
+                'start' => [109,38,143,38],
             ];
             foreach ($areas as $type => $area) {
                 $inArea = $event->column >= $area[0] && $event->column <= $area[2] && $event->row >= $area[1] && $event->row <= $area[3];
@@ -173,7 +172,6 @@ class HeroStartPage implements PageInterface
                     ->borderType(BorderType::Rounded)
                     ->titles(Title::fromString('Портрет'))
                     ->widget(
-//                        ParagraphWidget::fromString($this->getPortraitPath())
                         ImageWidget::fromPath($this->getPortraitPath()),
                     ),
                 GridWidget::default()

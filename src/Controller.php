@@ -2,9 +2,12 @@
 
 namespace Game;
 
+use Game\Page\DialogPage;
+use Game\Page\GamePage;
 use Game\Page\HeroStartPage;
 use Game\Page\PageInterface;
 use Game\Page\MainPage;
+use Game\Page\SettingsPage;
 use Game\Page\Stop;
 use PhpTui\Term\Actions;
 use PhpTui\Term\ClearType;
@@ -13,8 +16,13 @@ use PhpTui\Term\Event\CharKeyEvent;
 use PhpTui\Term\Terminal;
 use PhpTui\Tui\DisplayBuilder;
 use PhpTui\Tui\Extension\Bdf\BdfExtension;
+use PhpTui\Tui\Extension\Core\Widget\BlockWidget;
+use PhpTui\Tui\Extension\Core\Widget\ParagraphWidget;
 use PhpTui\Tui\Extension\ImageMagick\ImageMagickExtension;
 use PhpTui\Tui\Model\Display\Display;
+use PhpTui\Tui\Model\Style;
+use PhpTui\Tui\Model\Text\Title;
+use PhpTui\Tui\Model\Widget\Borders;
 
 class Controller
 {
@@ -24,7 +32,8 @@ class Controller
     private Display $display;
     private PageInterface $page;
 
-    private bool $isRun = true;
+    private bool $isDebug = false;
+    private Event $lastEvent;
 
     public function __construct(
         private UI     $ui,
@@ -38,8 +47,13 @@ class Controller
             ->addExtension(new BdfExtension())
             ->build();
 
-        //$this->page = new MainPage();
-        $this->page = new HeroStartPage();
+        $this->page = new MainPage();
+
+//          $this->page = new SettingsPage();
+
+        // for debug 1 frame
+  //      $this->page->render($this->display);
+  //      exit;
 
         Audio::startMusic('luma_dream_machine.wav');
     }
@@ -66,14 +80,18 @@ class Controller
 
     private function mainLoop(): int
     {
-        while ($this->isRun) {
+        while (true) {
             while (null !== $event = $this->terminal->events()->next()) {
-                $page = $this->globalHandle($event) ?: $this->page->handle($event);
+                $this->lastEvent = $event;
+                $page = $this->globalHandle($event) ?? $this->page->handle($event);
                 if ($page !== null) {
                     if ($page instanceof Stop) {
-                        $this->isRun = false;
+                        break 2;
                     }
                     $this->page = $page;
+                }
+                if ($this->isDebug) {
+                    $this->debugPanel();
                 }
             }
             $this->page->render($this->display);
@@ -89,11 +107,30 @@ class Controller
         return 0;
     }
 
+    private function debugPanel(): void
+    {
+        $display = DisplayBuilder::default()->fixed(0, 20, 50, 20)->build();
+        BlockWidget::default()->borders(Borders::NONE);
+        $display->draw(
+            BlockWidget::default()->borders(Borders::ALL)->titles(Title::fromString('debug events'))
+                ->style(Style::default()->yellow())
+                ->widget(
+                    ParagraphWidget::fromString(print_r($this->lastEvent, true))->style(Style::default()->yellow())
+                )
+        );
+    }
+
     private function globalHandle(Event $event): ?PageInterface
     {
         if ($event instanceof Event\CodedKeyEvent) {
             if ($event->code->name === 'Esc' && (!$this->page instanceof MainPage)) {
                 return new MainPage();
+            }
+        }
+        if ($event instanceof Event\CharKeyEvent) {
+            if ($event->char === '`') {
+                $this->isDebug = !$this->isDebug;
+                $this->display->clear();
             }
         }
         return null;
