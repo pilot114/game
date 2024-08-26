@@ -32,7 +32,25 @@ class HeroStartPage implements PageInterface
     private string $class = 'warrior';
     private string $gender = 'men';
 
-    private string $description = '<описание персонажа, собираемое по входным параметрам>';
+    private array $specialAbilities = [
+        'Мастер торга' => 'Раз в сутки можно убедить торговца продать товар по себестоймости',
+        'Паучье чутьё' => 'Вы получаете предупреждение и возможность убежать, если вступаете в бой сильно превосходящим вас противником',
+        'Железный желудок' => 'Испорченная и отравленная еда не даёт негативных эффектов',
+        'Эхо прошлого' => 'Вы можете видеть и слышать призраков',
+        'Катализатор' => 'Вы притягиваете к себе редкие и случайные события, которые могут быть как полезными, так и опасными',
+    ];
+    private int $specialAbilityIndex = 0;
+
+    private string $description = '<текстовое описание персонажа, собираемое по входным параметрам>';
+
+    private function getAbilityName(): string
+    {
+        return array_keys($this->specialAbilities)[$this->specialAbilityIndex];
+    }
+    private function getAbilityDescription(): string
+    {
+        return $this->specialAbilities[$this->getAbilityName()];
+    }
 
     public function handle(Event $event): ?PageInterface
     {
@@ -40,6 +58,14 @@ class HeroStartPage implements PageInterface
             if ($event->button->name !== 'Left' || $event->kind->name !== 'Down') {
                 return null;
             }
+            if ($event->column === 1 && $event->row === 14) {
+                $this->specialAbilityIndex === 0 ? $this->specialAbilityIndex = 4 : $this->specialAbilityIndex--;
+            }
+            if ($event->column === 16 && $event->row === 14) {
+                $this->specialAbilityIndex === 4 ? $this->specialAbilityIndex = 0 : $this->specialAbilityIndex++;
+            }
+
+
             $areas = [
                 'race_human' => [1,1,34,1],
                 'race_lizzard' => [1,2,34,2],
@@ -160,12 +186,21 @@ class HeroStartPage implements PageInterface
                         ->borderType(BorderType::Rounded)
                         ->titles(Title::fromString('Особенность'))
                         ->widget(
-                            ParagraphWidget::fromString('...')
+                            GridWidget::default()
+                                ->constraints(
+                                    Constraint::min(1),
+                                    Constraint::min(10),
+                                )
+                                ->widgets(
+                                    ParagraphWidget::fromString('⮘ ' . $this->getAbilityName() . ' ⮚'),
+                                    ParagraphWidget::fromString($this->getAbilityDescription()),
+                                )
                         ),
                     BlockWidget::default()
                         ->borders(Borders::ALL)
                         ->borderType(BorderType::Rounded)
                         ->titles(Title::fromString('Параметры'))
+                    ->widget($this->getParamGrid())
                 ),
                 BlockWidget::default()
                     ->borders(Borders::ALL)
@@ -197,6 +232,31 @@ class HeroStartPage implements PageInterface
                     )
                 ),
             )
+        );
+    }
+
+    private function getParamGrid(): GridWidget
+    {
+        return GridWidget::default()
+            ->constraints(
+                Constraint::max(1),
+                Constraint::max(1),
+                Constraint::max(1),
+                Constraint::max(1),
+                Constraint::max(1),
+                Constraint::max(1),
+                Constraint::max(1),
+                Constraint::max(1),
+            )
+            ->widgets(
+            ParagraphWidget::fromString('Сила         ⮘ 10 ⮚'),
+            ParagraphWidget::fromString('Ловкость     ⮘ 10 ⮚'),
+            ParagraphWidget::fromString('Телосложение ⮘ 10 ⮚'),
+            ParagraphWidget::fromString('Интеллект    ⮘ 10 ⮚'),
+            ParagraphWidget::fromString('Мудрость     ⮘ 10 ⮚'),
+            ParagraphWidget::fromString('Харизма      ⮘ 10 ⮚'),
+            ParagraphWidget::fromString(''),
+            ParagraphWidget::fromString('Не иcпользовано очков: 10'),
         );
     }
 }

@@ -49,11 +49,11 @@ class Controller
 
         $this->page = new MainPage();
 
-//          $this->page = new SettingsPage();
+    //      $this->page = new HeroStartPage();
 
         // for debug 1 frame
   //      $this->page->render($this->display);
-  //      exit;
+//        exit;
 
         Audio::startMusic('luma_dream_machine.wav');
     }
