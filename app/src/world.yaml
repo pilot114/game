@@ -1,0 +1,53 @@
+locations:
+  - name: "Forest"
+    description: "A dense and dark forest."
+    monsters:
+      - name: "Goblin"
+        level: 1
+        health: 10
+        attack: 2
+        loot:
+          - name: "Goblin Ear"
+            description: "A trophy from a Goblin"
+    items:
+      - name: "Old Sword"
+        description: "An old rusty sword"
+    npcs: []
+
+  - name: "Village"
+    description: "A small peaceful village."
+    monsters:
+      - name: "Bandit"
+        level: 2
+        health: 15
+        attack: 3
+        loot:
+          - name: "Bandit Dagger"
+            description: "A small dagger used by Bandits"
+    items: []
+    npcs:
+      - name: "Villager"
+        dialogue: "A friendly villager"
+        quests:
+          - title: "Find my lost sheep"
+            description: "Find and return the lost sheep"
+            tasks:
+              - title: "Kill Bandit"
+                action: "KILL"
+              - title: "Take Old Sword"
+                action: "TAKE"
+              - title: "Talk to Villager"
+                action: "TALK"
+
+  - name: "Dungeon"
+    description: "A dangerous dungeon full of monsters."
+    monsters:
+      - name: "Dragon"
+        level: 10
+        health: 100
+        attack: 20
+        loot:
+          - name: "Dragon Scale"
+            description: "A rare scale from a Dragon"
+    items: []
+    npcs: []

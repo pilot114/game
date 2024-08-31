@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
+    <script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+</head>
+<body>
+<div id="terminal-container"></div>
+<div id="php_out"></div>
+<script>
+    (async function loadPhpWeb() {
+        const terminal = new Terminal();
+        terminal.open(document.getElementById('terminal-container'));
+
+        const { PhpWeb } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs');
+        const php = new PhpWeb();
+
+        php.addEventListener('output', (event) => {
+            terminal.writeln(event.detail[0]);
+        });
+        php.addEventListener('error', (event) => {
+            console.log(event.detail);
+        });
+
+        php.inputString('This is a string of data provided on STDIN.');
+
+        let phpCode = `<?php
+            echo 1;
+            sleep(1);
+            echo 1;
+            sleep(1);
+            echo 1;
+        ?>`;
+
+        await php.run(phpCode);
+    })();
+</script>
+</body>
+</html>
