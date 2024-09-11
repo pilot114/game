@@ -3,6 +3,8 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/app/src" isTestSource="false" packagePrefix="Game\" />
+      <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/app/vendor/composer" />
       <excludeFolder url="file://$MODULE_DIR$/app/vendor/php-tui/cassowary" />
       <excludeFolder url="file://$MODULE_DIR$/app/vendor/php-tui/php-tui" />
@@ -11,6 +13,20 @@
       <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/polyfill-mbstring" />
       <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/var-dumper" />
       <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/yaml" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/cuyz/valinor" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/psr/cache" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/psr/container" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/psr/event-dispatcher" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/psr/log" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/psr/simple-cache" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/cache" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/cache-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/deprecation-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/event-dispatcher" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/event-dispatcher-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/expression-language" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/service-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/var-exporter" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

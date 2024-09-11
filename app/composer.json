@@ -7,10 +7,13 @@
         }
     },
     "require": {
+        "ext-pcntl": "*",
+        "ext-posix": "*",
         "symfony/var-dumper": "^7.1",
         "symfony/yaml": "^7.1",
-        "php-tui/php-tui": "^0.1.0",
-        "ext-pcntl": "*",
-        "ext-posix": "*"
+        "symfony/event-dispatcher": "^7.1",
+        "symfony/expression-language": "^7.1",
+        "php-tui/php-tui": "dev-main",
+        "cuyz/valinor": "^1.13"
     }
 }
