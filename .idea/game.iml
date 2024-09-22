@@ -27,6 +27,15 @@
       <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/expression-language" />
       <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/service-contracts" />
       <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/var-exporter" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/nyholm/psr7" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/openai-php/client" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/php-http/discovery" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/php-http/multipart-stream-builder" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/psr/http-client" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/psr/http-factory" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/psr/http-message" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/http-client" />
+      <excludeFolder url="file://$MODULE_DIR$/app/vendor/symfony/http-client-contracts" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

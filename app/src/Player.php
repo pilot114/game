@@ -2,6 +2,8 @@
 
 namespace Game;
 
+use Game\UI\UI;
+
 class Player
 {
     public string $name;

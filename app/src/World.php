@@ -2,6 +2,7 @@
 
 namespace Game;
 
+use Game\UI\UI;
 use Symfony\Component\Yaml\Yaml;
 
 class World

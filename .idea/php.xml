@@ -25,9 +25,7 @@
       <path value="$PROJECT_DIR$/app/vendor/php-tui/term" />
       <path value="$PROJECT_DIR$/app/vendor/composer" />
       <path value="$PROJECT_DIR$/app/vendor/symfony/polyfill-mbstring" />
-      <path value="$PROJECT_DIR$/app/vendor/symfony/yaml" />
       <path value="$PROJECT_DIR$/app/vendor/symfony/var-dumper" />
-      <path value="$PROJECT_DIR$/app/vendor/symfony/polyfill-ctype" />
       <path value="$PROJECT_DIR$/app/vendor/psr/event-dispatcher" />
       <path value="$PROJECT_DIR$/app/vendor/symfony/event-dispatcher" />
       <path value="$PROJECT_DIR$/app/vendor/symfony/event-dispatcher-contracts" />
@@ -42,6 +40,17 @@
       <path value="$PROJECT_DIR$/app/vendor/symfony/deprecation-contracts" />
       <path value="$PROJECT_DIR$/app/vendor/cuyz/valinor" />
       <path value="$PROJECT_DIR$/app/vendor/psr/simple-cache" />
+      <path value="$PROJECT_DIR$/app/vendor/psr/http-message" />
+      <path value="$PROJECT_DIR$/app/vendor/psr/http-client" />
+      <path value="$PROJECT_DIR$/app/vendor/php-http/multipart-stream-builder" />
+      <path value="$PROJECT_DIR$/app/vendor/php-http/discovery" />
+      <path value="$PROJECT_DIR$/app/vendor/openai-php/client" />
+      <path value="$PROJECT_DIR$/app/vendor/symfony/http-client" />
+      <path value="$PROJECT_DIR$/app/vendor/nyholm/psr7" />
+      <path value="$PROJECT_DIR$/app/vendor/symfony/http-client-contracts" />
+      <path value="$PROJECT_DIR$/app/vendor/psr/http-factory" />
+      <path value="$PROJECT_DIR$/app/vendor/symfony/yaml" />
+      <path value="$PROJECT_DIR$/app/vendor/symfony/polyfill-ctype" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2">
