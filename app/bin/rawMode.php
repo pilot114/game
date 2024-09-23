@@ -56,7 +56,7 @@ enum Format: int
     case HIDE = 8;
 }
 
-enum Command: string
+enum CommandCode: string
 {
     case UP = "\033[A";
     case DOWN = "\033[B";
@@ -76,6 +76,29 @@ enum Command: string
     case ESCAPE = "\033";
 }
 
+function format(string $text, Color $fg, ?Color $bg = null, ?Format $format = null): string
+{
+    $sequence = $fg->value;
+    if ($bg !== null) {
+        $bgValue = $bg->value + 10;
+        $sequence .= ";$bgValue";
+    }
+    if ($format !== null) {
+        $sequence .= ";$format->value";
+    }
+    return "\033[" . $sequence . "m" . $text . "\033[" . Format::CLEAR->value . "m";
+}
+
+function getSize(): array
+{
+    $output = [];
+    exec('stty size', $output);
+    if (!empty($output) && preg_match('/(\d+) (\d+)/', $output[0], $matches)) {
+        return [(int)$matches[2], (int)$matches[1]];
+    }
+    return [null, null];
+}
+
 function getCursor(): array
 {
     echo "\033[6n";
@@ -92,32 +115,23 @@ function getCursor(): array
     return [null, null];
 }
 
-function getSize(): array
-{
-    $output = [];
-    exec('stty size', $output);
-    if (!empty($output) && preg_match('/(\d+) (\d+)/', $output[0], $matches)) {
-        return [(int)$matches[2], (int)$matches[1]];
-    }
-    return [null, null];
-}
-
 function moveCursor(int $x, int $y): string
 {
     return "\033[{$y};{$x}H";
 }
 
-function format(string $text, Color $fg, ?Color $bg = null, ?Format $format = null): string
+enum MouseCode: int
 {
-    $sequence = $fg->value;
-    if ($bg !== null) {
-        $bgValue = $bg->value + 10;
-        $sequence .= ";$bgValue";
-    }
-    if ($format !== null) {
-        $sequence .= ";$format->value";
-    }
-    return "\033[" . $sequence . "m" . $text . "\033[" . Format::CLEAR->value . "m";
+    case LEFT = 0;
+    case MIDDLE = 1;
+    case RIGHT = 2;
+    case RELEASE = 3;
+    case DRAG_LEFT = 32;
+    case DRAG_MIDDLE = 33;
+    case DRAG_RIGHT = 34;
+    case MOVE = 35;
+    case SCROLL_UP = 64;
+    case SCROLL_DOWN = 65;
 }
 
 function enableMouseTracking(): void
@@ -134,20 +148,6 @@ function disableMouseTracking(): void
     echo "\033[?1006l";
 }
 
-enum MouseEvent: int
-{
-    case LEFT = 0;
-    case MIDDLE = 1;
-    case RIGHT = 2;
-    case RELEASE = 3;
-    case DRAG_LEFT = 32;
-    case DRAG_MIDDLE = 33;
-    case DRAG_RIGHT = 34;
-    case MOVE = 35;
-    case SCROLL_UP = 64;
-    case SCROLL_DOWN = 65;
-}
-
 function decodeMouseEvent(string $input): array
 {
     if (preg_match('/\033\[<(\d+);(\d+);(\d+)([Mm])/', $input, $matches)) {
@@ -155,12 +155,20 @@ function decodeMouseEvent(string $input): array
         $x = (int)$matches[2];
         $y = (int)$matches[3];
         $isRelease = $matches[4] === 'm';
-        $event = MouseEvent::tryFrom($code);
+        $event = MouseCode::tryFrom($code);
         return [$event, $x, $y, $isRelease];
     }
     return [null, null, null, null];
 }
 
+// нужны
+// колбэк на чтение (символы/текст/команды (включая сочетания)), должен принимать Event
+// колбэк на запись (скидываем из буфера, только дифф)
+// TODO: ob_start() и ob_end_flush() в случаях, когда есть много echo подряд (или массив, откуда выводим)
+function terminal(callable $input, callable $output): void
+{
+
+}
 
 system('stty -icanon -echo && clear');
 enableMouseTracking();
@@ -180,19 +188,9 @@ try {
                 continue;
             }
 
-            // это минимум для событий мыши
+            // это необходимый максимум байт для событий мыши
             $input = fread(STDIN, 12);
             if ($input === false) {
-                continue;
-            }
-
-            // Обработка команд клавиатуры
-            $command = Command::tryFrom($input);
-            if ($command !== null) {
-                if ($command === Command::ESCAPE) {
-                    break;
-                }
-                // echo "Команда $command->name\n";
                 continue;
             }
 
@@ -201,6 +199,26 @@ try {
             if ($event !== null) {
                 // echo implode(' ', [$event->name, $x, $y, $isRelease]) . "\n";
                 continue;
+            }
+
+            // Обработка команд клавиатуры
+            $command = CommandCode::tryFrom($input);
+            if ($command !== null) {
+                if ($command === CommandCode::ESCAPE) {
+                    break;
+                }
+                // echo "Команда $command->name\n";
+                continue;
+            }
+
+            // Обработка комбинаций
+            $isCtrl = strlen($input) === 1 && ord($input) >= 1 && ord($input) <= 26;
+            $isAlt = strlen($input) > 1 && $input[0] === "\033";
+            if ($isCtrl) {
+                echo "Ctrl\n";
+            }
+            if ($isAlt) {
+                echo "Alt\n";
             }
 
             // Обработка одиночных символов
@@ -216,4 +234,4 @@ try {
     system('stty sane && clear');
 }
 
-// TODO: ob_start() и ob_end_flush() в случаях, когда есть много echo подряд ()
+// TODO: мышь все еще ловится при Ctrl+C

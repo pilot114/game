@@ -66,7 +66,7 @@
 
   - trigger: "checkpoint1 && hero.attentiveness > 5 && hero.isSearch"
     journal: "Я нашел следы. Идти до [village.21:25]"
-    set: checkpoint2 = hero.position == village.21:25
+    set: "checkpoint2 = hero.position == village.21:25"
 
   - trigger: "checkpoint1 && hero.attentiveness in (4,5)"
     message: "Вам показалось, что здесь что-то есть..."
@@ -74,7 +74,7 @@
   - trigger: "checkpoint2 && !timer"
     journal: "Я нашел козлика (точнее, то что от него осталось), надо поговорить с пастухом"
     message: "Вы нашли козлика - от него остались только рожки да ножки"
-    set: checkpoint3 = true
+    set: "checkpoint3 = true"
 
   - trigger: "checkpoint2 && timer"
     journal: "На меня напали!"
@@ -83,7 +83,7 @@
 
   - trigger: "checkpoint2 && timer"
     journal: "Я победил некроманта, нужно рассказать о случившемся пастуху"
-    set: checkpoint3 = true
+    set: "checkpoint3 = true"
 
   - trigger: "checkpoint3 && finish"
     journal: "Я получил благодарность и награду от пастуха"

@@ -231,7 +231,7 @@ class DragTest extends Demo
     }
 }
 
-$demo = new DragTest();
+$demo = new GridTest();
 $demo->run();
 
 
