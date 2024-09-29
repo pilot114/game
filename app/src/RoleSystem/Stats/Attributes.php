@@ -4,35 +4,90 @@ namespace Game\RoleSystem\Stats;
 
 class Attributes
 {
+    // 1-20
     public function __construct(
-        public int $strength,
-        public int $dexterity,
-        public int $constitution,
-        public int $charisma,
-        public int $intelligence,
-        public int $wisdom,
+        public int $strength = 10,
+        public int $dexterity = 10,
+        public int $intelligence = 10,
+        public int $health = 10, // по сути - выносливость ?
     ) {
     }
 
-    public function getModificator(string $name): int
+    public function up(string $name, int $points): void
     {
-        return match ($this->$name) {
-            1 => -5,
-            2,3 => -4,
-            4,5 => -3,
-            6,7 => -2,
-            8,9 => -1,
-            10,11 => 0,
-            12,13 => 1,
-            14,15 => 2,
-            16,17 => 3,
-            18,19 => 4,
-            20,21 => 5,
-            22,23 => 6,
-            24,25 => 7,
-            26,27 => 8,
-            28,29 => 9,
-            30 => 10,
+        if ($name === 'strength' || $name === 'health') {
+            $points = 10; // -10
+        }
+        if ($name === 'dexterity' || $name === 'intelligence') {
+            $points = 20; // -20
+        }
+    }
+
+    // вторичные характеристики
+
+    // базовый груз в фунтах (0.54 кг)
+    public function baseLoad(): float
+    {
+        return ($this->strength * $this->strength) / 5;
+    }
+
+    public function healthPoint(): int
+    {
+        return $this->strength;
+    }
+
+    // воля
+    public function will(): int
+    {
+        return $this->intelligence;
+    }
+
+    public function perception(): int
+    {
+        return $this->intelligence;
+    }
+
+    public function fatigue(): int
+    {
+        return $this->health;
+    }
+
+    public function speed(): float
+    {
+        return ($this->health + $this->dexterity) / 4;
+    }
+
+    // уклонение
+    public function evasion(): int
+    {
+        return (int)(floor($this->speed())) + 3;
+    }
+
+    public function movement(): int
+    {
+        return (int)(floor($this->speed()));
+    }
+
+    // возвращает 2 значения: от прямой атаки и амплитудной
+    public function damage(): array
+    {
+        return match ($this->strength) {
+            1, 2 => [mt_rand(1, 6) - 6, mt_rand(1, 6) - 5],
+            3, 4 => [mt_rand(1, 6) - 5, mt_rand(1, 6) - 4],
+            5, 6 => [mt_rand(1, 6) - 4, mt_rand(1, 6) - 3],
+            7, 8 => [mt_rand(1, 6) - 3, mt_rand(1, 6) - 2],
+            9 => [mt_rand(1, 6) - 2, mt_rand(1, 6) - 1],
+            10 => [mt_rand(1, 6) - 2, mt_rand(1, 6)],
+            11 => [mt_rand(1, 6) - 1, mt_rand(1, 6) + 1],
+            12 => [mt_rand(1, 6) - 1, mt_rand(1, 6) + 2],
+            13 => [mt_rand(1, 6), mt_rand(1, 6) + mt_rand(1, 6) - 1],
+            14 => [mt_rand(1, 6), mt_rand(1, 6) + mt_rand(1, 6)],
+            15 => [mt_rand(1, 6) + 1, mt_rand(1, 6) + mt_rand(1, 6) + 1],
+            16 => [mt_rand(1, 6) + 1, mt_rand(1, 6) + mt_rand(1, 6) + 2],
+            17 => [mt_rand(1, 6) + 2, mt_rand(1, 6) + mt_rand(1, 6) + mt_rand(1, 6) - 1],
+            18 => [mt_rand(1, 6) + 2, mt_rand(1, 6) + mt_rand(1, 6) + mt_rand(1, 6)],
+            19 => [mt_rand(1, 6) + mt_rand(1, 6) - 1, mt_rand(1, 6) + mt_rand(1, 6) + mt_rand(1, 6) + 1],
+            20 => [mt_rand(1, 6) + mt_rand(1, 6) - 1, mt_rand(1, 6) + mt_rand(1, 6) + mt_rand(1, 6) + 2],
         };
     }
 }

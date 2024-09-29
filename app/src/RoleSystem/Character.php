@@ -3,17 +3,24 @@
 namespace Game\RoleSystem;
 
 use Game\RoleSystem\Contract\CharacterInterface;
+use Game\RoleSystem\Social\Attitude;
+use Game\RoleSystem\Social\Wealth;
 use Game\RoleSystem\Stats\Attributes;
 use Game\RoleSystem\Stats\Gender;
 use Game\RoleSystem\Stats\Race;
+use Game\RoleSystem\Stats\Skill;
 use Game\RoleSystem\Stats\Speciality;
 
 abstract class Character implements CharacterInterface
 {
     protected int $health;
     protected int $mana;
-    protected int $level;
-    protected int $experience;
+    protected int $experiencePoints;
+    protected TechLevel $techLevel; // TODO: как влияет? стоймость: +-5 очков
+
+    protected Wealth $wealth; // богатство
+    protected int $reputation; // репутация. от-4до+4. За каждый левел 5 очков
+    protected int $influence; // влиятельность, статус. от -2 (раб) до 8 (король). За каждый левел 5 очков
 
     public function __construct(
         protected Race       $race,
@@ -22,34 +29,6 @@ abstract class Character implements CharacterInterface
         protected string     $name,
         protected Speciality $speciality = Speciality::NEUTRAL,
     ) {
-        if ($race === Race::DWARF) {
-            $this->attributes->constitution += 2;
-        }
-        if ($race === Race::LIZARD) {
-            $this->attributes->strength += 2;
-            $this->attributes->charisma += 1;
-        }
-        if ($race === Race::HUMAN) {
-            foreach ($this->attributes as &$char) {
-                $char += 1;
-            }
-        }
-
-        $healthBonus = $this->attributes->getModificator('constitution');
-        $manaBonus = $this->attributes->getModificator('intelligence');
-        $this->health = max($healthBonus, 0);
-        $this->mana = max($manaBonus, 0);
-
-        $this->health += match ($this->speciality) {
-            Speciality::WARRIOR => 10,
-            default => 8,
-        };
-        $this->mana += match ($this->speciality) {
-            Speciality::WIZARD => 10,
-            default => 8,
-        };
-        $this->level = 1;
-        $this->experience = 0;
     }
 
     public function __toString(): string
@@ -78,42 +57,9 @@ abstract class Character implements CharacterInterface
         return implode(' ', $info);
     }
 
-    public function levelUp(?string $selectedBonus = null): self
-    {
-        $this->level += 1;
-
-        if ($this->level % 4 === 0) {
-            if ($selectedBonus === null) {
-                match ($this->speciality) {
-                    Speciality::WARRIOR => $this->attributes->constitution += 1,
-                    Speciality::WIZARD => $this->attributes->intelligence += 1,
-                    Speciality::NEUTRAL => null,
-                };
-            } else {
-                $this->attributes->{$selectedBonus} += 1;
-            }
-        }
-
-        $healthBonus = $this->attributes->getModificator('constitution');
-        $manaBonus = $this->attributes->getModificator('intelligence');
-        $this->health += max($healthBonus, 0);
-        $this->mana += max($manaBonus, 0);
-
-        $this->health += match ($this->speciality) {
-            Speciality::WARRIOR => rollDices(1, 10),
-            default => rollDices(1, 8),
-        };
-        $this->mana += match ($this->speciality) {
-            Speciality::WIZARD, => rollDices(1, 10),
-            default => rollDices(1, 8),
-        };
-
-        return $this;
-    }
-
     // TODO: пропуск / повторение попыток определяется здравым смыслом =)
     // TODO: величина успеха помогает в состязаниях. Само состязание может проходить по разной логике, разное время
-    public function success(Skill|Attributes $stat, int $modifier = 0): array
+    public function stats(Skill|Attributes $stat, int $modifier = 0): array
     {
         $effectiveValue = $this->getStatValue($stat) + $modifier;
 
@@ -150,7 +96,9 @@ abstract class Character implements CharacterInterface
 
     // отношение к персонажу
     // TODO: внешность, расы, поведение
-    public function attitude(int $modifier = 0): Attitude
+    // TODO: Голос (за 10 очков, +2 за разговорные умения, +2 на social если вас слышат)
+    // TODO: Харизма (5 очков за каждый уровень) +1 social за каждый уровень, +1 броски влияния, +1 к умениям Лидерство/Публичное выступление
+    public function social(int $modifier = 0): Attitude
     {
         $check = array_sum([
             mt_rand(1, 6),

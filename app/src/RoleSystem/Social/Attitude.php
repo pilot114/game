@@ -1,7 +1,8 @@
 <?php
 
-namespace Game\RoleSystem;
+namespace Game\RoleSystem\Social;
 
+// отношение
 enum Attitude
 {
     case TERRIBLE;
