@@ -12,6 +12,7 @@ class Location
 
     /** @var array<0: ?int, 1: ?int> */
     public array $grid;
+    public int $scale;
 
     public function __construct(
         // название в игре

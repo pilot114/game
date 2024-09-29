@@ -2,11 +2,11 @@
 
 include __DIR__ . '/../vendor/autoload.php';
 
-use Game\RoleSystem\Chars;
-use Game\RoleSystem\Gender;
 use Game\RoleSystem\Player;
-use Game\RoleSystem\Race;
-use Game\RoleSystem\Speciality;
+use Game\RoleSystem\Stats\Attributes;
+use Game\RoleSystem\Stats\Gender;
+use Game\RoleSystem\Stats\Race;
+use Game\RoleSystem\Stats\Speciality;
 
 /**
  * Скрипт для генерации игровых и неигровых персонажей (player / NPC)
@@ -109,7 +109,7 @@ function createRandomPlayerWithLevel(int $level): Player
         $chars[randomItem($tmp)] = 14 + rollDices(1, 4);
     }
 
-    $chars = new Chars(...$chars);
+    $chars = new Attributes(...$chars);
     $name = randomName($race, $gender);
     $player = new Player(
         $race, $chars, $gender, $name, $speciality, 1, 2

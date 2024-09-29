@@ -1,8 +1,8 @@
 <?php
 
-namespace Game\RoleSystem;
+namespace Game\RoleSystem\Stats;
 
-class Chars
+class Attributes
 {
     public function __construct(
         public int $strength,

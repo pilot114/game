@@ -1,6 +1,6 @@
 <?php
 
-namespace Game\RoleSystem;
+namespace Game\RoleSystem\Stats;
 
 enum Gender
 {

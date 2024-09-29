@@ -7,6 +7,8 @@ use Game\Player;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
+// компания - приключение - встреча
+
 class Quest
 {
     public function __construct(
