@@ -2,6 +2,8 @@
 
 namespace Game;
 
+use Game\Quest\Quest;
+use Game\Quest\Task;
 use Game\UI\UI;
 
 class Player

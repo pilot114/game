@@ -2,7 +2,13 @@
 
 namespace Game\UI\Page;
 
+use Game\UI\AbstractPage;
+use Game\UI\PageEvent;
+use Game\UI\PageEventType;
+use Game\UI\PageInterface;
 use PhpTui\Term\Event;
+use PhpTui\Term\Terminal;
+use PhpTui\Tui\Display\Display;
 use PhpTui\Tui\Extension\Core\Widget\BlockWidget;
 use PhpTui\Tui\Extension\Core\Widget\GridWidget;
 use PhpTui\Tui\Extension\Core\Widget\List\ListItem;
@@ -10,17 +16,16 @@ use PhpTui\Tui\Extension\Core\Widget\List\ListState;
 use PhpTui\Tui\Extension\Core\Widget\ListWidget;
 use PhpTui\Tui\Extension\Core\Widget\ParagraphWidget;
 use PhpTui\Tui\Extension\ImageMagick\Widget\ImageWidget;
-use PhpTui\Tui\Model\Direction;
-use PhpTui\Tui\Model\Display\Display;
-use PhpTui\Tui\Model\HorizontalAlignment;
-use PhpTui\Tui\Model\Layout\Constraint;
-use PhpTui\Tui\Model\Style;
-use PhpTui\Tui\Model\Text\Text;
-use PhpTui\Tui\Model\Text\Title;
-use PhpTui\Tui\Model\Widget\Borders;
-use PhpTui\Tui\Model\Widget\BorderType;
+use PhpTui\Tui\Layout\Constraint;
+use PhpTui\Tui\Style\Style;
+use PhpTui\Tui\Text\Text;
+use PhpTui\Tui\Text\Title;
+use PhpTui\Tui\Widget\Borders;
+use PhpTui\Tui\Widget\BorderType;
+use PhpTui\Tui\Widget\Direction;
+use PhpTui\Tui\Widget\HorizontalAlignment;
 
-class HeroStartPage implements PageInterface
+class HeroStartPage extends AbstractPage
 {
     private string $race = 'human';
     private string $class = 'warrior';
@@ -37,8 +42,11 @@ class HeroStartPage implements PageInterface
 
     private string $description = '<текстовое описание персонажа, собираемое по входным параметрам>';
 
-    public function __construct()
-    {
+    public function __construct(
+        protected Terminal $terminal,
+        protected Display  $display,
+    ){
+        parent::__construct($terminal, $display);
         $this->specialAbilityIndex = rand(0, 4);
     }
 
@@ -51,19 +59,17 @@ class HeroStartPage implements PageInterface
         return $this->specialAbilities[$this->getAbilityName()];
     }
 
-    public function handle(Event $event): ?PageInterface
+    public function handle(Event $event): ?PageEvent
     {
-        if ($event instanceof Event\MouseEvent) {
-            if ($event->button->name !== 'Left' || $event->kind->name !== 'Down') {
-                return null;
-            }
-            if ($event->column === 1 && $event->row === 14) {
-                $this->specialAbilityIndex === 0 ? $this->specialAbilityIndex = 4 : $this->specialAbilityIndex--;
-            }
-            if ($event->column === 16 && $event->row === 14) {
-                $this->specialAbilityIndex === 4 ? $this->specialAbilityIndex = 0 : $this->specialAbilityIndex++;
-            }
-
+        if ($this->isClick($event)) {
+                if ($event->column === 1 && $event->row === 14) {
+                    $this->specialAbilityIndex === 0 ? $this->specialAbilityIndex = 4 : $this->specialAbilityIndex--;
+                    return new PageEvent(PageEventType::NeedDraw);
+                }
+                if ($event->column === 16 && $event->row === 14) {
+                    $this->specialAbilityIndex === 4 ? $this->specialAbilityIndex = 0 : $this->specialAbilityIndex++;
+                    return new PageEvent(PageEventType::NeedDraw);
+                }
 
             $areas = [
                 'race_human' => [1,1,34,1],
@@ -79,10 +85,11 @@ class HeroStartPage implements PageInterface
                 $inArea = $event->column >= $area[0] && $event->column <= $area[2] && $event->row >= $area[1] && $event->row <= $area[3];
                 if ($inArea) {
                     if ($type === 'start') {
-                        return new GamePage();
+                        return $this->emitChangePageEvent(GamePage::class);
                     }
                     [$key, $value] = explode('_', $type);
                     $this->$key = $value;
+                    return new PageEvent(PageEventType::NeedDraw);
                 }
             }
         }
@@ -91,7 +98,7 @@ class HeroStartPage implements PageInterface
 
     private function getPortraitPath(): string
     {
-        return __DIR__ . "/../../resources/images/hero/{$this->race}_{$this->gender}_{$this->class}.webp";
+        return __DIR__ . "/../../../resources/images/hero/{$this->race}_{$this->gender}_{$this->class}_resized.webp";
     }
 
     private function getRaceIndex(): int
@@ -119,9 +126,9 @@ class HeroStartPage implements PageInterface
         };
     }
 
-    public function render(Display $display): void
+    public function draw(): void
     {
-        $display->draw(
+        $this->display->draw(
             GridWidget::default()
             ->direction(Direction::Horizontal)
             ->constraints(
@@ -227,7 +234,7 @@ class HeroStartPage implements PageInterface
                     )
                     ->borders(Borders::ALL)->borderType(BorderType::Rounded)
                     ->widget(
-                        ParagraphWidget::fromString('Сгенерировать мир и начать игру')->alignment(HorizontalAlignment::Center)
+                        ParagraphWidget::fromString('Начать игру')->alignment(HorizontalAlignment::Center)
                     )
                 ),
             )

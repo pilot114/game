@@ -14,7 +14,8 @@ class Audio
         self::$pids[$name] = pcntl_fork();
 
         if(self::$pids[$name] > 0) {
-            $command = "play ./resources/sounds/$name";
+            $file = __DIR__ . "/../resources/sounds/$name";
+            $command =  "play $file";
             $playProcess = proc_open($command, [
                 ['pipe' ,'r'],
                 ['pipe', 'w'],

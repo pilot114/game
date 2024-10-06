@@ -2,31 +2,36 @@
 
 namespace Game\UI\Page;
 
+use Game\UI\AbstractPage;
+use Game\UI\PageEvent;
+use Game\UI\PageEventType;
 use PhpTui\Term\Event;
+use PhpTui\Term\Terminal;
+use PhpTui\Tui\Display\Display;
 use PhpTui\Tui\Extension\Core\Widget\BlockWidget;
 use PhpTui\Tui\Extension\Core\Widget\GridWidget;
 use PhpTui\Tui\Extension\Core\Widget\List\ListItem;
 use PhpTui\Tui\Extension\Core\Widget\List\ListState;
 use PhpTui\Tui\Extension\Core\Widget\ListWidget;
 use PhpTui\Tui\Extension\Core\Widget\ParagraphWidget;
-use PhpTui\Tui\Model\Color;
-use PhpTui\Tui\Model\Color\AnsiColor;
-use PhpTui\Tui\Model\Direction;
-use PhpTui\Tui\Model\Display\Display;
-use PhpTui\Tui\Model\HorizontalAlignment;
-use PhpTui\Tui\Model\Layout\Constraint;
-use PhpTui\Tui\Model\Style;
-use PhpTui\Tui\Model\Text\Text;
-use PhpTui\Tui\Model\Widget\Borders;
-use PhpTui\Tui\Model\Widget\BorderType;
+use PhpTui\Tui\Layout\Constraint;
+use PhpTui\Tui\Style\Style;
+use PhpTui\Tui\Text\Text;
+use PhpTui\Tui\Widget\Borders;
+use PhpTui\Tui\Widget\BorderType;
+use PhpTui\Tui\Widget\Direction;
+use PhpTui\Tui\Widget\HorizontalAlignment;
 
-class SettingsPage implements PageInterface
+class SettingsPage extends AbstractPage
 {
     private array $colours = [];
     private int $colourIndex = 3;
 
-    public function __construct()
-    {
+    public function __construct(
+        protected Terminal $terminal,
+        protected Display  $display,
+    ){
+        parent::__construct($this->terminal, $this->display);
         $this->colours = [
             Style::default()->yellow(),
             Style::default()->green(),
@@ -35,17 +40,17 @@ class SettingsPage implements PageInterface
         ];
     }
 
-    public function handle(Event $event): ?PageInterface
+    public function handle(Event $event): ?PageEvent
     {
-        if ($event instanceof Event\MouseEvent) {
-            if ($event->button->name !== 'Left' || $event->kind->name !== 'Down') {
-                return null;
-            }
-            if ($event->column === 82 && $event->row === 11) {
+        if ($this->isClick($event)) {
+            // TODO: inArea check
+            if ($event->column === 110 && $event->row === 14) {
                 $this->colourIndex === 0 ? $this->colourIndex = 3 : $this->colourIndex--;
+                return new PageEvent(PageEventType::NeedDraw);
             }
-            if ($event->column === 91 && $event->row === 11) {
+            if ($event->column === 119 && $event->row === 14) {
                 $this->colourIndex === 3 ? $this->colourIndex = 0 : $this->colourIndex++;
+                return new PageEvent(PageEventType::NeedDraw);
             }
         }
         return null;
@@ -67,9 +72,9 @@ class SettingsPage implements PageInterface
         };
     }
 
-    public function render(Display $display): void
+    public function draw(): void
     {
-        $display->draw(
+        $this->display->draw(
             GridWidget::default()
                 ->direction(Direction::Horizontal)
                 ->constraints(

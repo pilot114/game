@@ -2,6 +2,9 @@
 
 namespace Game\UI\Page;
 
+use Game\UI\AbstractPage;
+use Game\UI\PageEvent;
+use Game\UI\PageEventType;
 use PhpTui\Term\Event;
 use PhpTui\Tui\Extension\Core\Widget\BlockWidget;
 use PhpTui\Tui\Extension\Core\Widget\GridWidget;
@@ -9,19 +12,19 @@ use PhpTui\Tui\Extension\Core\Widget\List\ListItem;
 use PhpTui\Tui\Extension\Core\Widget\List\ListState;
 use PhpTui\Tui\Extension\Core\Widget\ListWidget;
 use PhpTui\Tui\Extension\Core\Widget\ParagraphWidget;
-use PhpTui\Tui\Model\Direction;
-use PhpTui\Tui\Model\Display\Display;
-use PhpTui\Tui\Model\HorizontalAlignment;
-use PhpTui\Tui\Model\Layout\Constraint;
-use PhpTui\Tui\Model\Text\Text;
-use PhpTui\Tui\Model\Widget\Borders;
-use PhpTui\Tui\Model\Widget\BorderType;
+use PhpTui\Tui\Layout\Constraint;
+use PhpTui\Tui\Text\Text;
+use PhpTui\Tui\Widget\Borders;
+use PhpTui\Tui\Widget\BorderType;
+use PhpTui\Tui\Widget\Direction;
+use PhpTui\Tui\Widget\HorizontalAlignment;
 
-class MainPage implements PageInterface
+class MainPage extends AbstractPage
 {
     private int $itemIndex = 0;
+    private int $buildNumber = 2;
 
-    public function handle(Event $event): ?PageInterface
+    public function handle(Event $event): ?PageEvent
     {
         if ($event instanceof Event\MouseEvent) {
             return null;
@@ -29,27 +32,27 @@ class MainPage implements PageInterface
         if ($event instanceof Event\CodedKeyEvent) {
             if ($event->code->name === 'Up') {
                 $this->itemIndex === 0 ? $this->itemIndex = 4 : $this->itemIndex--;
+                return new PageEvent(PageEventType::NeedDraw);
             }
             if ($event->code->name === 'Down') {
                 $this->itemIndex === 4 ? $this->itemIndex = 0 : $this->itemIndex++;
+                return new PageEvent(PageEventType::NeedDraw);
             }
             if ($event->code->name === 'Enter') {
                 return match ($this->itemIndex) {
-                    0 => new HeroStartPage(),
-                    1 => null,
-                    2 => null,
-                    3 => new SettingsPage(),
-                    4 => new Stop(),
-                    default => null,
+                    0 => $this->emitChangePageEvent(HeroStartPage::class),
+                    1, 2 => null,
+                    3 => $this->emitChangePageEvent(SettingsPage::class),
+                    4 => new PageEvent(PageEventType::Stop),
                 };
             }
         }
         return null;
     }
 
-    public function render(Display $display): void
+    public function draw(): void
     {
-        $display->draw(
+        $this->display->draw(
             GridWidget::default()
             ->direction(Direction::Horizontal)
             ->constraints(
@@ -75,13 +78,13 @@ class MainPage implements PageInterface
                             Constraint::percentage(100),
                         )
                         ->widgets(
-                            ParagraphWidget::fromString('
+                            ParagraphWidget::fromString("
 ┏┳┓┓     ┓         ┏┓       
  ┃ ┣┓┏┓  ┃ ┏┓┏┓┏┓  ┗┓╋┏┓┏┓┓┏
  ┻ ┛┗┗   ┗┛┗┛┛┗┗┫  ┗┛┗┗┛┛ ┗┫
                 ┛          ┛
-build 1 by 0x600dc0de
-')->alignment(HorizontalAlignment::Center),
+build $this->buildNumber by 0x600dc0de
+")->alignment(HorizontalAlignment::Center),
                             GridWidget::default()
                             ->direction(Direction::Horizontal)
                             ->constraints(
