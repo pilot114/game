@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@php-wasm/web": "^0.9.34",
+    "@php-wasm/web": "^0.7.20",
     "@xterm/xterm": "^5.5.0",
     "wasm-webterm": "github:cryptool-org/wasm-webterm",
     "xterm": "^4.19.0"
