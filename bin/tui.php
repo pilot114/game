@@ -16,3 +16,6 @@ $demo = new PageController(startPage: MainPage::class);
 $demo->run();
 
 Audio::stopMusic('luma_dream_machine.wav');
+
+// checkboxes:
+// red ⨯ green ✓

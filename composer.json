@@ -10,16 +10,19 @@
         "ext-pcntl": "*",
         "ext-posix": "*",
         "ext-imagick": "*",
-        "symfony/var-dumper": "^7.1",
-        "symfony/event-dispatcher": "^7.1",
-        "symfony/expression-language": "^7.1",
-        "symfony/http-client": "^7.1",
+        "symfony/var-dumper": "^7.2",
+        "symfony/event-dispatcher": "^7.2",
+        "symfony/expression-language": "^7.2",
+        "symfony/http-client": "^7.2",
+        "symfony/yaml": "^7.2",
+        "symfony/console": "^7.2",
+
         "nyholm/psr7": "^1.8",
         "php-tui/php-tui": "dev-main",
-        "cuyz/valinor": "^1.13",
+        "cuyz/valinor": "^1.14",
         "openai-php/client": "^0.10",
-        "symfony/yaml": "^7.1",
-        "symfony/console": "^7.1"
+        "cycle/orm": "^2.9",
+        "cycle/annotated": "^4.2"
     },
     "config": {
         "allow-plugins": {
