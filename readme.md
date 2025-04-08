@@ -24,3 +24,9 @@ image php:8.3-cli-alpine
     
 minimal term resolution: 120x30 (2/1)
 264x75
+
+
+### 3d models
+
+https://sketchfab.com
+https://www.mixamo.com/
