@@ -9,8 +9,6 @@ use Cycle\Annotated\Locator\TokenizerEmbeddingLocator;
 use Cycle\Annotated\Locator\TokenizerEntityLocator;
 use Cycle\ORM;
 use Cycle\ORM\EntityManager;
-use Game\Entity\GameObjectTemplate;
-use Game\Enum\GameObjectType;
 use Spiral\Tokenizer\ClassLocator;
 use Symfony\Component\Finder\Finder;
 
@@ -60,25 +58,12 @@ $orm = new ORM\ORM(new ORM\Factory($dbal), new ORM\Schema($schema));
 $em = new EntityManager($orm);
 
 // write via EM
-//$user = new User("Antony");
-//$em->persist($user)->run();
+// $em->persist($user)->run();
 
 // read via Repo
+// $user = $orm->getRepository(User::class)->findByPK(1);
 
-//$user = $orm->getRepository(User::class)->findByPK(1);
-//dump($user->toArray());
+/** @var \Game\Entity\GameObject $object */
+$object = $orm->getRepository(\Game\Entity\GameObject::class)->findByPK(4);
 
-$entities = [];
-$entities[] = new GameObjectTemplate(
-    name: 'Житель деревни',
-    description: 'Обычный человек без оружия',
-    type: GameObjectType::NPC,
-);
-$entities[] = new GameObjectTemplate(
-    name: 'Зелье здоровья',
-    description: 'Восстанавливает HP',
-    type: GameObjectType::Item,
-);
-foreach ($entities as $entity) {
-    $em->persist($entity)->run();
-}
+dump($object->toArray());

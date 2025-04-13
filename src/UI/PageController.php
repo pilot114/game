@@ -44,6 +44,7 @@ final class PageController
     public function run(): void
     {
         try {
+            $this->terminal->execute(Actions::clear(ClearType::All));
             $this->terminal->execute(Actions::cursorHide());
             $this->terminal->execute(Actions::alternateScreenEnable());
             $this->terminal->execute(Actions::enableMouseCapture());

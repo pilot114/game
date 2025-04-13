@@ -102,6 +102,7 @@ build $this->buildNumber by 0x600dc0de
                                         ListItem::new(Text::fromString(' Загрузить')),
                                         ListItem::new(Text::fromString(' Настройки')),
                                         ListItem::new(Text::fromString(' Выход')),
+                                        ListItem::new(Text::fromString(`img2sixel resources/images/doomgay2.jpg`)),
                                     )
                             )
                         )

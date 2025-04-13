@@ -31,7 +31,7 @@ class Location
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'parentLocation' => $this->parentLocation->toArray(),
+            'parentLocation' => $this->parentLocation?->toArray(),
         ];
     }
 }
